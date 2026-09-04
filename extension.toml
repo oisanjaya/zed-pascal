@@ -1,14 +1,14 @@
 id = "pascal"
 name = "Pascal"
-version = "0.1.0"
+version = "0.1.1-oisanjaya"
 schema_version = 1
-authors = ["Guilherme Caldas <gcaldas@chemis.tech>"]
+authors = ["Guilherme Caldas <gcaldas@chemis.tech>, Rio Sanjaya <oisanjaya@gmail.com>"]
 description = "Pascal language support."
-repository = "https://github.com/ChemisTechlabs/zed-pascal"
+repository = "https://github.com/oisanjaya/zed-pascal/tree/feature"
 
 [grammars.pascal]
-repository = "https://github.com/ChemisTechlabs/tree-sitter-pascal"
-rev = "489e273895a452a79dc74749ed99793d20ee85c1"
+repository = "https://github.com/oisanjaya/tree-sitter-pascal"
+rev = "4c7ff14ec3ddf7df577a8814f9d5dcc1371db2b6"
 
 [language_servers.pascal]
 name = "pascal-language-server"
