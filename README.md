@@ -4,10 +4,8 @@ A Pascal Language extension for Zed Editor.
 
 | Feature                | Status             |
 | ---------------------- | ------------------ |
-| Grammar (highlighting) | 🟡 In Progress     |
-| Language Server (LSP)  | ⚪ Planned         |
-| Linter                 | ⚪ Planned         |
-| Formatter              | ⚪ Planned         |
+| Grammar (highlighting) | ✅ Mostly complete     |
+| Language Server (LSP)  | ✅ Using pasls   |
 
 ## Notes
 
