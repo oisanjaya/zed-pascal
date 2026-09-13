@@ -8,7 +8,7 @@ repository = "https://github.com/oisanjaya/zed-pascal/tree/feature"
 
 [grammars.pascal]
 repository = "https://github.com/oisanjaya/tree-sitter-pascal"
-rev = "4c7ff14ec3ddf7df577a8814f9d5dcc1371db2b6"
+rev = "90877056cab8a9934b6e8d1564fc52f79f9f0d5b"
 
 [language_servers.pascal]
 name = "pascal-language-server"
