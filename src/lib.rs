@@ -1,4 +1,8 @@
-use zed_extension_api::{self as zed, settings::LspSettings, Extension, LanguageServerId, Result};
+use std::fs;
+use zed_extension_api::{
+    self as zed, settings::LspSettings, Architecture, DownloadedFileType, LanguageServerId, Os,
+    Result,
+};
 
 struct PascalExtension;
 
@@ -12,20 +16,34 @@ impl zed::Extension for PascalExtension {
         language_server_id: &LanguageServerId,
         worktree: &zed::Worktree,
     ) -> Result<zed::Command> {
-        let mut command = "/usr/bin/pasls".to_string();
+        let (os, arch) = zed::current_platform();
+
+        let binary_name = if os == Os::Windows {
+            "pasls-release/pasls-win64-x86_64.exe"
+        } else {
+            "pasls-release/pasls-linux-x86_64"
+        };
+
+        let mut command = binary_name.to_string();
         let mut args = vec![];
         let mut env = vec![
             ("PP".to_string(), "/usr/bin/fpc".to_string()),
             ("FPCDIR".to_string(), "/usr/share/fpcsrc".to_string()),
-            ("LAZARUSDIR".to_string(), "/home/.lazarus/Lazarus".to_string()),
+            (
+                "LAZARUSDIR".to_string(),
+                "$HOME/.lazarus/Lazarus".to_string(),
+            ),
             ("FPCTARGET".to_string(), "linux".to_string()),
             ("FPCTARGETCPU".to_string(), "x86_64".to_string()),
         ];
-        
+
+        let mut user_provided_binary = false;
+
         if let Ok(lsp_settings) = LspSettings::for_worktree(language_server_id.as_ref(), worktree) {
             if let Some(binary) = lsp_settings.binary {
                 if let Some(path) = binary.path {
                     command = path;
+                    user_provided_binary = true;
                 }
                 if let Some(binary_args) = binary.arguments {
                     args = binary_args;
@@ -40,7 +58,56 @@ impl zed::Extension for PascalExtension {
                         }
                     }
                 }
-                
+            }
+        }
+
+        if !user_provided_binary {
+            if !fs::metadata(&command).map_or(false, |stat| stat.is_file()) {
+                zed::set_language_server_installation_status(
+                    language_server_id,
+                    &zed::LanguageServerInstallationStatus::Downloading,
+                );
+
+                let release = zed::latest_github_release(
+                    "oisanjaya/pascal-language-server/tree/feature",
+                    zed::GithubReleaseOptions {
+                        require_assets: true,
+                        pre_release: false,
+                    },
+                )
+                .map_err(|e| format!("Failed to fetch GitHub release info: {}", e))?;
+
+                let (os, arch) = zed::current_platform();
+                let download_url = match (os, arch) {
+                    (Os::Linux, Architecture::X8664) => {
+                        "https://github.com/oisanjaya/pascal-language-server/releases/download/v0.0.1/pasls-linux-x86_64.tar.gz"
+                    }
+                    (Os::Windows, Architecture::X8664) => {
+                        "https://github.com/oisanjaya/pascal-language-server/releases/download/v0.0.1/pasls-win64-x86_64.zip"
+                    }
+                    _ => return Err(format!("Unsupported platform: {:?} {:?}", os, arch)),
+                };
+
+                zed::download_file(
+                    download_url,
+                    "pasls-release",
+                    if os == Os::Windows {
+                        DownloadedFileType::Zip
+                    } else {
+                        DownloadedFileType::GzipTar
+                    },
+                )
+                .map_err(|e| format!("Failed to download pasls: {}", e))?;
+
+                if os != Os::Windows {
+                    zed::make_file_executable(&command)
+                        .map_err(|e| format!("Failed to set permissions: {}", e))?;
+                }
+
+                zed::set_language_server_installation_status(
+                    language_server_id,
+                    &zed::LanguageServerInstallationStatus::None,
+                );
             }
         }
 
