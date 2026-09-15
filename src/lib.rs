@@ -69,7 +69,7 @@ impl zed::Extension for PascalExtension {
                 );
 
                 let release = zed::latest_github_release(
-                    "oisanjaya/pascal-language-server/tree/feature",
+                    "oisanjaya/pascal-language-server",
                     zed::GithubReleaseOptions {
                         require_assets: true,
                         pre_release: false,
@@ -77,19 +77,20 @@ impl zed::Extension for PascalExtension {
                 )
                 .map_err(|e| format!("Failed to fetch GitHub release info: {}", e))?;
 
-                let (os, arch) = zed::current_platform();
-                let download_url = match (os, arch) {
-                    (Os::Linux, Architecture::X8664) => {
-                        "https://github.com/oisanjaya/pascal-language-server/releases/download/v0.0.1/pasls-linux-x86_64.tar.gz"
-                    }
-                    (Os::Windows, Architecture::X8664) => {
-                        "https://github.com/oisanjaya/pascal-language-server/releases/download/v0.0.1/pasls-win64-x86_64.zip"
-                    }
+				let asset_name_suffix = match (os, arch) {
+                    (Os::Linux, Architecture::X8664) => "linux-x86_64.tar.gz",
+                    (Os::Windows, Architecture::X8664) => "win64-x86_64.zip",
                     _ => return Err(format!("Unsupported platform: {:?} {:?}", os, arch)),
                 };
+                
+                let asset = release
+					.assets
+					.iter()
+					.find(|asset| asset.name.contains(asset_name_suffix))
+					.ok_or_else(|| format!("No asset found matching {}", asset_name_suffix))?;
 
                 zed::download_file(
-                    download_url,
+                    &asset.download_url,
                     "pasls-release",
                     if os == Os::Windows {
                         DownloadedFileType::Zip
