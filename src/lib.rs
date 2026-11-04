@@ -95,7 +95,7 @@ impl zed::Extension for PascalExtension {
                 let asset = release
 					.assets
 					.iter()
-					.find(|asset| asset.name.contains(asset_name_suffix))
+					.find(|asset| asset.name.contains(&asset_name_suffix))
 					.ok_or_else(|| format!("No asset found matching {}", asset_name_suffix))?;
 
                 zed::download_file(
