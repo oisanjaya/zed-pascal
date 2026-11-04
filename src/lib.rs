@@ -28,9 +28,9 @@ impl zed::Extension for PascalExtension {
         };
 		
         let binary_name = if os == Os::Windows {
-            format!("pasls-release/{}.exe", asset_base)
+            format!("pasls-release/{}/pasls.exe", asset_base)
         } else {
-            format!("pasls-release/{}", asset_base)
+            format!("pasls-release/{}/pasls", asset_base)
         };
 		
         let mut command = binary_name.clone();
