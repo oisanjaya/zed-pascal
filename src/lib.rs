@@ -18,13 +18,22 @@ impl zed::Extension for PascalExtension {
     ) -> Result<zed::Command> {
         let (os, arch) = zed::current_platform();
 
-        let binary_name = if os == Os::Windows {
-            "pasls-release/pasls-win64-x86_64.exe"
-        } else {
-            "pasls-release/pasls-linux-x86_64"
+		let (asset_base, is_zip) = match (os, arch) {
+            (Os::Mac, Architecture::Aarch64) => ("pasls-aarch64-darwin", true),
+            (Os::Linux, Architecture::Aarch64) => ("pasls-aarch64-linux", false),
+            (Os::Linux, Architecture::X8664) => ("pasls-x86_64-linux", false),
+            (Os::Windows, Architecture::X8664) => ("pasls-x86_64-win64", true),
+            (Os::Windows, Architecture::X86) => ("pasls-i386-win32", true),
+            _ => return Err(format!("Unsupported platform: {:?} {:?}", os, arch)),
         };
-
-        let mut command = binary_name.to_string();
+		
+        let binary_name = if os == Os::Windows {
+            format!("pasls-release/{}.exe", asset_base)
+        } else {
+            format!("pasls-release/{}", asset_base)
+        };
+		
+        let mut command = binary_name.clone();
         let mut args = vec![];
         let mut env = vec![
             ("PP".to_string(), "/usr/bin/fpc".to_string()),
@@ -77,10 +86,10 @@ impl zed::Extension for PascalExtension {
                 )
                 .map_err(|e| format!("Failed to fetch GitHub release info: {}", e))?;
 
-				let asset_name_suffix = match (os, arch) {
-                    (Os::Linux, Architecture::X8664) => "linux-x86_64.tar.gz",
-                    (Os::Windows, Architecture::X8664) => "win64-x86_64.zip",
-                    _ => return Err(format!("Unsupported platform: {:?} {:?}", os, arch)),
+				let asset_name_suffix = if is_zip {
+                    format!("{}.zip", asset_base)
+                } else {
+                    format!("{}.tar.gz", asset_base)
                 };
                 
                 let asset = release
@@ -92,7 +101,7 @@ impl zed::Extension for PascalExtension {
                 zed::download_file(
                     &asset.download_url,
                     "pasls-release",
-                    if os == Os::Windows {
+                    if is_zip {
                         DownloadedFileType::Zip
                     } else {
                         DownloadedFileType::GzipTar
