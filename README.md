@@ -4,10 +4,8 @@ A Pascal Language extension for Zed Editor.
 
 | Feature                | Status             |
 | ---------------------- | ------------------ |
-| Grammar (highlighting) | 🟡 In Progress     |
-| Language Server (LSP)  | ⚪ Planned         |
-| Linter                 | ⚪ Planned         |
-| Formatter              | ⚪ Planned         |
+| Grammar (highlighting) | ✅ Mostly complete     |
+| Language Server (LSP)  | ✅ Using pasls   |
 
 ## Notes
 
@@ -15,4 +13,4 @@ A Pascal Language extension for Zed Editor.
 Chemis Techlabs.
 - Dialects still being mapped. A list of supported Pascal dialects will be soon
 available for documentation and roadmap purposes.
-- Tree Sitter available at [ChemisTechlabs/tree-sitter-pascal](https://github.com/ChemisTechlabs/tree-sitter-pascal)
+- Tree Sitter available at [oisanjaya/tree-sitter-pascal](https://github.com/oisanjaya/tree-sitter-pascal)
